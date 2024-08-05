@@ -1,6 +1,6 @@
-import { Pause, Play, RotateCcw } from "lucide-react";
+import { Pause, Play, RotateCcw, SquareX } from "lucide-react";
 
-export type IconName = "play" | "pause" | "restart";
+export type IconName = "play" | "pause" | "restart" | "clear";
 
 interface IconProps {
   name: IconName;
@@ -17,6 +17,8 @@ const Icon = (props: IconProps): JSX.Element => {
       return <Pause size={size} />;
     case "restart":
       return <RotateCcw size={size} />;
+    case "clear":
+      return <SquareX size={size} />;
   }
 };
 

@@ -20,9 +20,9 @@ function App() {
       if (playing) SceneHook.play();
       if (!playing) SceneHook.pause();
 
-      return playing
+      return playing;
     });
-  }
+  };
 
   return (
     <div className="dark w-full h-dvh bg-background fixed overflow-hidden">
@@ -39,6 +39,11 @@ function App() {
               onClick={toggleSceneState}
             />
             <IconButton icon="restart" onClick={SceneHook.restart} />
+            <IconButton
+              icon="clear"
+              onClick={SceneHook.clear}
+              disabled={isPlaying}
+            />
             <RangeInput
               name="Frame Rate"
               value={frameRate}

@@ -163,6 +163,16 @@ export default class Scene {
       : getAliveColor();
   }
 
+  clear() {
+    if (!this.canvasSize || !this.cellColors?.length) {
+      return;
+    }
+
+    this.cellColors = new Array(this.cellColors.length)
+      .fill(null)
+      .map(() => new Array(this.cellColors!.length).fill(getDeadColor()));
+  }
+
   destroy() {
     Scene.instance = undefined;
   }

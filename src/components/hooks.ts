@@ -6,6 +6,7 @@ interface SceneHook {
   restart: () => void;
   play: () => void;
   pause: () => void;
+  clear: () => void;
   toggleCell: (point: { x: number; y: number }) => void;
 }
 
@@ -32,7 +33,12 @@ export function useScene(): SceneHook {
     scene.toggleCell(point);
   };
 
-  return { restart, play, pause, toggleCell };
+  const clear = () => {
+    const scene = sceneRef.current;
+    scene.clear();
+  };
+
+  return { restart, play, pause, toggleCell, clear };
 }
 
 interface EngineHook {
