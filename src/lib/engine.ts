@@ -47,9 +47,9 @@ export default class Engine {
     return dt;
   }
 
-  private render(t: number, params: DrawParams) {
+  private async render(t: number, params: DrawParams) {
     const dt = this.getDeltaTime(t);
-    const sceneDescription = this.scene.getScene({
+    const sceneDescription = await this.scene.getSceneFromWorker({
       dt,
       numberOfCells: params.numberOfCells,
       frameRate: this.frameRate,

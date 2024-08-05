@@ -10,6 +10,7 @@ import {
   shouldBeBorn,
   shouldBeDead,
 } from "./gameplay";
+import UpdateCellColors from "../worker/updateCellColors?worker";
 
 enum SceneState {
   Playing = "playing",
@@ -132,6 +133,36 @@ export default class Scene {
       t: this.t,
       cellColors,
     };
+  }
+
+  async getSceneFromWorker(params: SceneParams): Promise<SceneDescription> {
+    return new Promise((resolve, reject) => {
+      this.t += params.dt;
+      this.canvasSize = params.canvasSize;
+      const cellColors = this.init();
+
+      if (!this.shouldUpdate(params.dt, params.frameRate)) {
+        return resolve({
+          t: this.t,
+          cellColors,
+        });
+      }
+
+      this.worker.postMessage(cellColors);
+
+      this.worker.onmessage = (event) => {
+        const cellColors = event.data;
+        this.cellColors = cellColors;
+        resolve({
+          t: this.t,
+          cellColors,
+        });
+      };
+
+      this.worker.onerror = (error) => {
+        reject(error);
+      };
+    });
   }
 
   restart() {
