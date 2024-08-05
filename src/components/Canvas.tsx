@@ -1,5 +1,5 @@
 import React from "react";
-import { useEngine } from "./hooks";
+import { useEngine, useScene } from "./hooks";
 
 interface CanvasProps {
   size: number;
@@ -10,6 +10,7 @@ interface CanvasProps {
 const Canvas = (props: CanvasProps): JSX.Element => {
   const { size, numberOfCells, frameRate } = props;
   const EngineHook = useEngine();
+  const SceneHook = useScene();
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
   React.useEffect(() => {
@@ -30,7 +31,27 @@ const Canvas = (props: CanvasProps): JSX.Element => {
     EngineHook.setFrameRate(frameRate);
   }, [frameRate]);
 
-  return <canvas ref={canvasRef} width={size} height={size} />;
+  const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const { offsetX, offsetY } = event.nativeEvent;
+    SceneHook.toggleCell({ x: offsetX, y: offsetY });
+  };
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (event.buttons === 1) {
+      const { offsetX, offsetY } = event.nativeEvent;
+      SceneHook.toggleCell({ x: offsetX, y: offsetY });
+    }
+  };
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={size}
+      height={size}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+    />
+  );
 };
 
 Canvas.displayName = "Canvas";

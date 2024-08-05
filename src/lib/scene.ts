@@ -18,6 +18,7 @@ interface SceneParams {
   dt: number;
   frameRate: number;
   numberOfCells: number;
+  canvasSize: number;
   cellColors?: string[][];
 }
 
@@ -37,9 +38,11 @@ export default class Scene {
   private state: SceneState;
   private t: number = 0;
   private frameTime: number = 0;
+  canvasSize: number | undefined = undefined;
   private cellColors: string[][] | undefined = undefined;
   private cache: Map<number, NeighborCache>;
   private static instance: Scene | undefined = undefined;
+
   private constructor() {
     this.state = SceneState.Paused;
     this.cache = new Map();
@@ -110,6 +113,7 @@ export default class Scene {
 
   getScene(params: SceneParams): SceneDescription {
     this.t += params.dt;
+    this.canvasSize = params.canvasSize;
     const cellColors = this.init(params.numberOfCells);
 
     if (this.shouldUpdate(params.dt, params.frameRate)) {
@@ -133,6 +137,22 @@ export default class Scene {
 
   pause() {
     this.state = SceneState.Paused;
+  }
+
+  toggleCell(point: { x: number; y: number }) {
+    if (this.state !== SceneState.Paused) {
+      return;
+    }
+    if (!this.canvasSize || !this.cellColors?.length) {
+      return;
+    }
+
+    const cellSize = this.canvasSize / this.cellColors.length;
+    const x = Math.floor(point.x / cellSize);
+    const y = Math.floor(point.y / cellSize);
+    this.cellColors[x][y] = isAlive(this.cellColors[x][y])
+      ? "transparent"
+      : "lightblue";
   }
 
   destroy() {

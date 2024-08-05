@@ -6,6 +6,7 @@ interface SceneHook {
   restart: () => void;
   play: () => void;
   pause: () => void;
+  toggleCell: (point: { x: number; y: number }) => void;
 }
 
 export function useScene(): SceneHook {
@@ -26,7 +27,12 @@ export function useScene(): SceneHook {
     scene.pause();
   };
 
-  return { restart, play, pause };
+  const toggleCell = (point: { x: number; y: number }) => {
+    const scene = sceneRef.current;
+    scene.toggleCell(point);
+  };
+
+  return { restart, play, pause, toggleCell };
 }
 
 interface EngineHook {

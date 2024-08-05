@@ -53,6 +53,7 @@ export default class Engine {
       dt,
       numberOfCells: params.numberOfCells,
       frameRate: this.frameRate,
+      canvasSize: params.ctx.canvas.width,
     });
 
     const { ctx, numberOfCells } = params;
