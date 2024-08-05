@@ -2,8 +2,64 @@ const colors = ["lightblue", "transparent"];
 
 const FRAME_RATE = 1;
 
+const BIRTH_THRESHOLD = 3;
+const DEATH_THRESHOLD_MIN = 2;
+const DEATH_THRESHOLD_MAX = 3;
+
 function randomColor(): string {
   return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function isDead(cell: string): boolean {
+  return cell === "transparent";
+}
+
+function isAlive(cell: string): boolean {
+  return !isDead(cell);
+}
+
+/**
+ * Retrieves the neighboring cell colors of a given cell at coordinates (x, y) in a 2D grid.
+ *
+ * @param x - The x-coordinate of the cell.
+ * @param y - The y-coordinate of the cell.
+ * @param cellColors - The 2D grid of cell colors.
+ * @returns An array of neighboring cell colors.
+ */
+function getNeighbors(x: number, y: number, cellColors: string[][]): string[] {
+  const neighbors: string[] = [];
+  const rows = cellColors.length;
+  const cols = cellColors[0].length;
+
+  for (let i = -1; i <= 1; i++) {
+    for (let j = -1; j <= 1; j++) {
+      if (i === 0 && j === 0) continue; // Skip the current cell
+      const neighborX = x + i;
+      const neighborY = y + j;
+      if (
+        neighborX >= 0 &&
+        neighborX < rows &&
+        neighborY >= 0 &&
+        neighborY < cols
+      ) {
+        neighbors.push(cellColors[neighborX][neighborY]);
+      }
+    }
+  }
+
+  return neighbors;
+}
+
+function shouldBeBorn(neighbors: string[]): boolean {
+  return neighbors.filter(isAlive).length === BIRTH_THRESHOLD;
+}
+
+function shouldBeDead(neighbors: string[]): boolean {
+  const aliveNeighbors = neighbors.filter(isAlive);
+  return (
+    aliveNeighbors.length < DEATH_THRESHOLD_MIN ||
+    aliveNeighbors.length > DEATH_THRESHOLD_MAX
+  );
 }
 
 interface SceneDescription {
@@ -56,10 +112,21 @@ export default class Scene {
     for (let x = 0; x < cellColors.length; x++) {
       for (let y = 0; y < cellColors[x].length; y++) {
         const lastColor = cellColors[x][y];
-        if (lastColor === "transparent") {
-          cellColors[x][y] = "lightblue";
-        } else {
-          cellColors[x][y] = "transparent";
+
+        if (isDead(lastColor)) {
+          const neighbors = getNeighbors(x, y, cellColors);
+          if (shouldBeBorn(neighbors)) {
+            cellColors[x][y] = "lightblue";
+          }
+          continue;
+        }
+
+        if (isAlive(lastColor)) {
+          const neighbors = getNeighbors(x, y, cellColors);
+          if (shouldBeDead(neighbors)) {
+            cellColors[x][y] = "transparent";
+          }
+          continue;
         }
       }
     }
