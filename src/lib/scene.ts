@@ -11,7 +11,7 @@ import {
   shouldBeBorn,
   shouldBeDead,
 } from "./gameplay";
-import UpdateCellColors from "../worker/updateCellColors?worker";
+import WorkerController from "./workerController";
 
 enum SceneState {
   Playing = "playing",
@@ -46,13 +46,13 @@ export default class Scene {
   private canvasSize: number | undefined = undefined;
   private cellColors: string[][] | undefined = undefined;
   private cache: Map<number, NeighborCache>;
-  private worker: Worker;
+  private workerController: WorkerController;
   private static instance: Scene | undefined = undefined;
 
   private constructor() {
     this.state = SceneState.Paused;
     this.cache = new Map();
-    this.worker = new UpdateCellColors();
+    this.workerController = new WorkerController();
   }
 
   static getInstance(): Scene {
@@ -141,35 +141,24 @@ export default class Scene {
   }
 
   async getSceneFromWorker(params: SceneParams): Promise<SceneDescription> {
-    return new Promise((resolve, reject) => {
-      this.t += params.dt;
-      this.canvasSize = params.canvasSize;
-      const cellColors = this.init();
+    this.t += params.dt;
+    this.canvasSize = params.canvasSize;
+    const cellColors = this.init();
 
-      if (!this.shouldUpdate(params.dt, params.frameRate)) {
-        return resolve({
-          t: this.t,
-          cellColors,
-          numberOfCells: this.numberOfCells,
-        });
-      }
-
-      this.worker.postMessage(cellColors);
-
-      this.worker.onmessage = (event) => {
-        const cellColors = event.data;
-        this.cellColors = cellColors;
-        resolve({
-          t: this.t,
-          cellColors,
-          numberOfCells: this.numberOfCells,
-        });
+    if (!this.shouldUpdate(params.dt, params.frameRate)) {
+      return {
+        t: this.t,
+        cellColors,
+        numberOfCells: this.numberOfCells,
       };
+    }
 
-      this.worker.onerror = (error) => {
-        reject(error);
-      };
-    });
+    this.cellColors = await this.workerController.calculateCells(cellColors);
+    return {
+      t: this.t,
+      cellColors: this.cellColors,
+      numberOfCells: this.numberOfCells,
+    };
   }
 
   restart() {

@@ -8,6 +8,7 @@ import {
   shouldBeBorn,
   shouldBeDead,
 } from "@/lib/gameplay";
+import { TaskDescription } from "@/lib/workerController";
 import { raise } from "@/utils/errors";
 
 const cache: Map<number, NeighborCache> = new Map();
@@ -19,12 +20,12 @@ function getOrCreateCache(key: number): NeighborCache {
   return cache.get(key) ?? raise("Cache not found.");
 }
 
-self.onmessage = (e: MessageEvent<string[][]>) => {
-  const cellColors = e.data;
+self.onmessage = (e: MessageEvent<TaskDescription>) => {
+  const { cellColors, start, end } = e.data;
   const cache = getOrCreateCache(cellColors.length);
   const updates: [number, number, string][] = [];
 
-  for (let x = 0; x < cellColors.length; x++) {
+  for (let x = start; x < end; x++) {
     for (let y = 0; y < cellColors[x].length; y++) {
       const lastColor = cellColors[x][y];
       const neighbors = getNeighbors(x, y, cellColors, cache);
@@ -49,5 +50,5 @@ self.onmessage = (e: MessageEvent<string[][]>) => {
     cellColors[x][y] = color;
   }
 
-  self.postMessage(cellColors);
+  self.postMessage({ cellColors, start, end });
 };
