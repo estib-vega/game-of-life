@@ -1,10 +1,12 @@
 import { raise } from "@/utils/errors";
 import {
+  getAliveColor,
+  getDeadColor,
   getNeighbors,
   isAlive,
   isDead,
   NeighborCache,
-  randomColor,
+  randomCell,
   shouldBeBorn,
   shouldBeDead,
 } from "./gameplay";
@@ -59,7 +61,7 @@ export default class Scene {
     if (!this.cellColors) {
       this.cellColors = new Array(numberOfCells)
         .fill(null)
-        .map(() => new Array(numberOfCells).fill(null).map(randomColor));
+        .map(() => new Array(numberOfCells).fill(null).map(randomCell));
     }
 
     if (!this.cache.has(numberOfCells)) {
@@ -89,6 +91,8 @@ export default class Scene {
     const cache =
       this.cache.get(cellColors.length) ?? raise("Cache not found.");
 
+    const updates: [number, number, string][] = [];
+
     for (let x = 0; x < cellColors.length; x++) {
       for (let y = 0; y < cellColors[x].length; y++) {
         const lastColor = cellColors[x][y];
@@ -96,18 +100,22 @@ export default class Scene {
 
         if (isDead(lastColor)) {
           if (shouldBeBorn(neighbors)) {
-            cellColors[x][y] = "lightblue";
+            updates.push([x, y, getAliveColor()]);
           }
           continue;
         }
 
         if (isAlive(lastColor)) {
           if (shouldBeDead(neighbors)) {
-            cellColors[x][y] = "transparent";
+            updates.push([x, y, getDeadColor()]);
           }
           continue;
         }
       }
+    }
+
+    for (const [x, y, color] of updates) {
+      cellColors[x][y] = color;
     }
   }
 
@@ -151,8 +159,8 @@ export default class Scene {
     const x = Math.floor(point.x / cellSize);
     const y = Math.floor(point.y / cellSize);
     this.cellColors[x][y] = isAlive(this.cellColors[x][y])
-      ? "transparent"
-      : "lightblue";
+      ? getDeadColor()
+      : getAliveColor();
   }
 
   destroy() {

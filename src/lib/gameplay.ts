@@ -1,20 +1,30 @@
+import { paddWith } from "@/utils/array";
 import { raise } from "@/utils/errors";
 
 const DEAD_COLOR = "transparent";
-
-const colors = ["lightblue", DEAD_COLOR];
+const NUM_OF_NEIGHBORS = 8;
 
 const BIRTH_THRESHOLD = 3;
 const DEATH_THRESHOLD_MIN = 2;
 const DEATH_THRESHOLD_MAX = 3;
 
+const colors = [DEAD_COLOR, "lightblue"] as const;
+
 export type NeighborCache = Map<string, number[][]>;
 
-export function randomColor(): string {
-  if (Math.random() < 0.05) {
-    return colors[0];
-  }
+export function getDeadColor(): string {
+  return DEAD_COLOR;
+}
+
+export function getAliveColor(): string {
   return colors[1];
+}
+
+export function randomCell(): string {
+  if (Math.random() < 0.05) {
+    return getAliveColor();
+  }
+  return getDeadColor();
 }
 
 function coord2Key(x: number, y: number): string {
@@ -48,7 +58,7 @@ export function getNeighbors(
     for (const [neighborX, neighborY] of neighborCoords) {
       neighbors.push(cellColors[neighborX][neighborY]);
     }
-    return neighbors;
+    return paddWith(neighbors, DEAD_COLOR, NUM_OF_NEIGHBORS);
   }
 
   const neighborCoords: number[][] = [];
@@ -72,7 +82,7 @@ export function getNeighbors(
   // Cache the neighbor coords
   cache.set(key, neighborCoords);
 
-  return neighbors;
+  return paddWith(neighbors, DEAD_COLOR, NUM_OF_NEIGHBORS);
 }
 
 export function isDead(cell: string): boolean {
