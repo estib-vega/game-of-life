@@ -14,7 +14,7 @@ const RangeInput = (props: RangeInputProps): JSX.Element => {
   const { name, value, min, max, step, onChange } = props;
 
   return (
-    <div className="max-w-72 border">
+    <div className="max-w-72">
       <Label htmlFor={name}>{`${name}: ${value}`}</Label>
       <Input
         type="range"

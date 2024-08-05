@@ -2,12 +2,15 @@ import React from "react";
 import Canvas from "./components/Canvas";
 import RangeInput from "./components/controllers/RangeInput";
 import { DEFAULT_FRAME_RATE } from "./lib/engine";
+import IconButton from "./components/generic/IconButton";
+import ToggleButtonIcon from "./components/generic/ToggleButtonIcon";
 
 const CANVAS_SIZE = 600;
 const NUM_OF_CELLS = 100;
 
 function App() {
   const [frameRate, setFrameRate] = React.useState<number>(DEFAULT_FRAME_RATE);
+  const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
 
   return (
     <div className="dark w-full h-dvh bg-background fixed overflow-hidden">
@@ -21,7 +24,14 @@ function App() {
             numberOfCells={NUM_OF_CELLS}
             frameRate={frameRate}
           />
-          <div className="border container py-4 w-full">
+          <div className="container py-4 w-full flex justify-center items-center gap-4">
+            <ToggleButtonIcon
+              iconOn="play"
+              iconOff="pause"
+              value={isPlaying}
+              onClick={() => setIsPlaying((prev) => !prev)}
+            />
+            <IconButton icon="restart" onClick={() => console.log("restart")} />
             <RangeInput
               name="Frame Rate"
               value={frameRate}
