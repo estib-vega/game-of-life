@@ -14,6 +14,16 @@ function App() {
   const [frameRate, setFrameRate] = React.useState<number>(DEFAULT_FRAME_RATE);
   const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
 
+  const toggleSceneState = () => {
+    setIsPlaying((prev) => {
+      const playing = !prev;
+      if (playing) SceneHook.play();
+      if (!playing) SceneHook.pause();
+
+      return playing
+    });
+  }
+
   return (
     <div className="dark w-full h-dvh bg-background fixed overflow-hidden">
       <div className="container h-full overflow-hidden flex flex-col">
@@ -28,10 +38,10 @@ function App() {
           />
           <div className="container py-4 w-full flex justify-center items-center gap-4">
             <ToggleButtonIcon
-              iconOn="play"
-              iconOff="pause"
+              iconOn="pause"
+              iconOff="play"
               value={isPlaying}
-              onClick={() => setIsPlaying((prev) => !prev)}
+              onClick={toggleSceneState}
             />
             <IconButton icon="restart" onClick={SceneHook.restart} />
             <RangeInput

@@ -4,6 +4,8 @@ import React from "react";
 
 interface SceneHook {
   restart: () => void;
+  play: () => void;
+  pause: () => void;
 }
 
 export function useScene(): SceneHook {
@@ -14,7 +16,17 @@ export function useScene(): SceneHook {
     scene.restart();
   };
 
-  return { restart };
+  const play = () => {
+    const scene = sceneRef.current;
+    scene.play();
+  };
+
+  const pause = () => {
+    const scene = sceneRef.current;
+    scene.pause();
+  };
+
+  return { restart, play, pause };
 }
 
 interface EngineHook {

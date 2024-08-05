@@ -9,6 +9,11 @@ import {
   shouldBeDead,
 } from "./gameplay";
 
+enum SceneState {
+  Playing = "playing",
+  Paused = "paused",
+}
+
 interface SceneParams {
   dt: number;
   frameRate: number;
@@ -29,12 +34,14 @@ interface SceneDescription {
  * updates the colors of the cells based on the time.
  */
 export default class Scene {
+  private state: SceneState;
   private t: number = 0;
   private frameTime: number = 0;
   private cellColors: string[][] | undefined = undefined;
   private cache: Map<number, NeighborCache>;
   private static instance: Scene | undefined = undefined;
   private constructor() {
+    this.state = SceneState.Paused;
     this.cache = new Map();
   }
 
@@ -60,6 +67,10 @@ export default class Scene {
   }
 
   private shouldUpdate(dt: number, frameRate: number): boolean {
+    if (this.state === SceneState.Paused) {
+      return false;
+    }
+
     const remainingFrameTime = this.frameTime - dt;
     if (remainingFrameTime <= 0) {
       const fr = frameRate;
@@ -114,6 +125,14 @@ export default class Scene {
   restart() {
     this.t = 0;
     this.cellColors = undefined;
+  }
+
+  play() {
+    this.state = SceneState.Playing;
+  }
+
+  pause() {
+    this.state = SceneState.Paused;
   }
 
   destroy() {
