@@ -46,7 +46,10 @@ export default class Engine {
 
   private render(t: number, params: DrawParams) {
     const dt = this.getDeltaTime(t);
-    const sceneDescription = this.scene.getScene(dt, params.numberOfCells);
+    const sceneDescription = this.scene.getScene({
+      dt,
+      numberOfCells: params.numberOfCells,
+    });
 
     const { ctx, numberOfCells } = params;
     ctx.fillStyle = "blue";

@@ -1,96 +1,22 @@
 import { raise } from "@/utils/errors";
+import {
+  getNeighbors,
+  isAlive,
+  isDead,
+  NeighborCache,
+  randomColor,
+  shouldBeBorn,
+  shouldBeDead,
+} from "./gameplay";
 
-const colors = ["lightblue", "transparent"];
+const DEFAULT_FRAME_RATE = 10;
 
-const FRAME_RATE = 60;
-
-const BIRTH_THRESHOLD = 3;
-const DEATH_THRESHOLD_MIN = 2;
-const DEATH_THRESHOLD_MAX = 3;
-
-function randomColor(): string {
-  return colors[Math.floor(Math.random() * colors.length)];
+interface SceneParams {
+  dt: number;
+  numberOfCells: number;
+  cellColors?: string[][];
+  frameRate?: number;
 }
-
-function isDead(cell: string): boolean {
-  return cell === "transparent";
-}
-
-function isAlive(cell: string): boolean {
-  return !isDead(cell);
-}
-
-function coord2Key(x: number, y: number): string {
-  return `${x},${y}`;
-}
-
-/**
- * Retrieves the neighboring cell colors of a given cell at coordinates (x, y) in a 2D grid.
- *
- * @param x - The x-coordinate of the cell.
- * @param y - The y-coordinate of the cell.
- * @param cellColors - The 2D grid of cell colors.
- * @param cache - A cache to store the neighboring cell coords.
- * @returns An array of neighboring cell colors.
- */
-function getNeighbors(
-  x: number,
-  y: number,
-  cellColors: string[][],
-  cache: NeighborCache
-): string[] {
-  const neighbors: string[] = [];
-  const rows = cellColors.length;
-  const cols = cellColors[0].length;
-
-  const key = coord2Key(x, y);
-  // Found in cache
-  if (cache.has(key)) {
-    const neighborCoords =
-      cache.get(key) ?? raise("Neighbor coords not found in cache.");
-    for (const [neighborX, neighborY] of neighborCoords) {
-      neighbors.push(cellColors[neighborX][neighborY]);
-    }
-    return neighbors;
-  }
-
-  const neighborCoords: number[][] = [];
-  for (let i = -1; i <= 1; i++) {
-    for (let j = -1; j <= 1; j++) {
-      if (i === 0 && j === 0) continue; // Skip the current cell
-      const neighborX = x + i;
-      const neighborY = y + j;
-      if (
-        neighborX >= 0 &&
-        neighborX < rows &&
-        neighborY >= 0 &&
-        neighborY < cols
-      ) {
-        neighborCoords.push([neighborX, neighborY]);
-        neighbors.push(cellColors[neighborX][neighborY]);
-      }
-    }
-  }
-
-  // Cache the neighbor coords
-  cache.set(key, neighborCoords);
-
-  return neighbors;
-}
-
-function shouldBeBorn(neighbors: string[]): boolean {
-  return neighbors.filter(isAlive).length === BIRTH_THRESHOLD;
-}
-
-function shouldBeDead(neighbors: string[]): boolean {
-  const aliveNeighbors = neighbors.filter(isAlive);
-  return (
-    aliveNeighbors.length < DEATH_THRESHOLD_MIN ||
-    aliveNeighbors.length > DEATH_THRESHOLD_MAX
-  );
-}
-
-type NeighborCache = Map<string, number[][]>;
 
 interface SceneDescription {
   t: number;
@@ -106,7 +32,7 @@ interface SceneDescription {
  */
 export default class Scene {
   private t: number = 0;
-  private frameTime: number = 1000 / FRAME_RATE;
+  private frameTime: number = 1000 / DEFAULT_FRAME_RATE;
   private cellColors: string[][] | undefined = undefined;
   private cache: Map<number, NeighborCache>;
   private static instance: Scene | undefined = undefined;
@@ -135,10 +61,11 @@ export default class Scene {
     return this.cellColors;
   }
 
-  private shouldUpdate(dt: number): boolean {
+  private shouldUpdate(dt: number, frameRate: number | undefined): boolean {
     const remainingFrameTime = this.frameTime - dt;
     if (remainingFrameTime <= 0) {
-      this.frameTime = 1000 / FRAME_RATE;
+      const fr = frameRate ?? DEFAULT_FRAME_RATE;
+      this.frameTime = 1000 / fr;
       return true;
     }
 
@@ -172,11 +99,11 @@ export default class Scene {
     }
   }
 
-  getScene(dt: number, numberOfCells: number): SceneDescription {
-    this.t += dt;
-    const cellColors = this.init(numberOfCells);
+  getScene(params: SceneParams): SceneDescription {
+    this.t += params.dt;
+    const cellColors = this.init(params.numberOfCells);
 
-    if (this.shouldUpdate(dt)) {
+    if (this.shouldUpdate(params.dt, params.frameRate)) {
       this.updateCellColors(cellColors);
     }
 
