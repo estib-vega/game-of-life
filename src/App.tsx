@@ -35,7 +35,7 @@ function App() {
       return;
     }
 
-    SceneHook.setNumberOfCells(value);
+    if (!Number.isNaN(value)) SceneHook.setNumberOfCells(value);
     setNumOfCells(value);
   };
 
