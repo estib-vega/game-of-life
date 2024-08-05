@@ -9,13 +9,11 @@ import {
   shouldBeDead,
 } from "./gameplay";
 
-const DEFAULT_FRAME_RATE = 10;
-
 interface SceneParams {
   dt: number;
+  frameRate: number;
   numberOfCells: number;
   cellColors?: string[][];
-  frameRate?: number;
 }
 
 interface SceneDescription {
@@ -32,7 +30,7 @@ interface SceneDescription {
  */
 export default class Scene {
   private t: number = 0;
-  private frameTime: number = 1000 / DEFAULT_FRAME_RATE;
+  private frameTime: number = 0;
   private cellColors: string[][] | undefined = undefined;
   private cache: Map<number, NeighborCache>;
   private static instance: Scene | undefined = undefined;
@@ -61,10 +59,10 @@ export default class Scene {
     return this.cellColors;
   }
 
-  private shouldUpdate(dt: number, frameRate: number | undefined): boolean {
+  private shouldUpdate(dt: number, frameRate: number): boolean {
     const remainingFrameTime = this.frameTime - dt;
     if (remainingFrameTime <= 0) {
-      const fr = frameRate ?? DEFAULT_FRAME_RATE;
+      const fr = frameRate;
       this.frameTime = 1000 / fr;
       return true;
     }

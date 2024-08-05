@@ -1,5 +1,7 @@
 import Scene from "./scene";
 
+export const DEFAULT_FRAME_RATE = 10;
+
 interface DrawParams {
   ctx: CanvasRenderingContext2D;
   numberOfCells: number;
@@ -7,6 +9,7 @@ interface DrawParams {
 
 export default class Engine {
   private static instance: Engine | undefined = undefined;
+  private frameRate: number = DEFAULT_FRAME_RATE;
   private lastTime: number = 0;
   private scene: Scene;
   private constructor() {
@@ -49,6 +52,7 @@ export default class Engine {
     const sceneDescription = this.scene.getScene({
       dt,
       numberOfCells: params.numberOfCells,
+      frameRate: this.frameRate,
     });
 
     const { ctx, numberOfCells } = params;
@@ -68,6 +72,10 @@ export default class Engine {
 
   start(params: DrawParams) {
     requestAnimationFrame((t) => this.render(t, params));
+  }
+
+  setFrameRate(frameRate: number) {
+    this.frameRate = frameRate;
   }
 
   destroy() {
