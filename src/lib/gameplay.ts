@@ -1,6 +1,8 @@
 import { paddWith } from "@/utils/array";
 import { raise } from "@/utils/errors";
 
+export const DEFAULT_NUMBER_OF_CELLS = 30;
+
 const DEAD_COLOR = "transparent";
 const NUM_OF_NEIGHBORS = 8;
 

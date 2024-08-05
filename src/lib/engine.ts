@@ -4,7 +4,6 @@ export const DEFAULT_FRAME_RATE = 10;
 
 export interface DrawParams {
   ctx: CanvasRenderingContext2D;
-  numberOfCells: number;
 }
 
 export default class Engine {
@@ -51,18 +50,16 @@ export default class Engine {
     const dt = this.getDeltaTime(t);
     const sceneDescription = await this.scene.getSceneFromWorker({
       dt,
-      numberOfCells: params.numberOfCells,
       frameRate: this.frameRate,
       canvasSize: params.ctx.canvas.width,
     });
-
-    const { ctx, numberOfCells } = params;
+    const { ctx } = params;
     ctx.fillStyle = "blue";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    const cellSize = ctx.canvas.width / numberOfCells;
+    const cellSize = ctx.canvas.width / sceneDescription.numberOfCells;
 
-    for (let x = 0; x < numberOfCells; x++) {
-      for (let y = 0; y < numberOfCells; y++) {
+    for (let x = 0; x < sceneDescription.numberOfCells; x++) {
+      for (let y = 0; y < sceneDescription.numberOfCells; y++) {
         const color = sceneDescription.cellColors[x][y];
         this.cell(x * cellSize, y * cellSize, cellSize, color, ctx);
       }

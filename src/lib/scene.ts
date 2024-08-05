@@ -1,5 +1,6 @@
 import { raise } from "@/utils/errors";
 import {
+  DEFAULT_NUMBER_OF_CELLS,
   getAliveColor,
   getDeadColor,
   getNeighbors,
@@ -20,7 +21,6 @@ enum SceneState {
 interface SceneParams {
   dt: number;
   frameRate: number;
-  numberOfCells: number;
   canvasSize: number;
   cellColors?: string[][];
 }
@@ -28,6 +28,7 @@ interface SceneParams {
 interface SceneDescription {
   t: number;
   cellColors: string[][];
+  numberOfCells: number;
 }
 
 /**
@@ -41,14 +42,17 @@ export default class Scene {
   private state: SceneState;
   private t: number = 0;
   private frameTime: number = 0;
-  canvasSize: number | undefined = undefined;
+  private numberOfCells: number = DEFAULT_NUMBER_OF_CELLS;
+  private canvasSize: number | undefined = undefined;
   private cellColors: string[][] | undefined = undefined;
   private cache: Map<number, NeighborCache>;
+  private worker: Worker;
   private static instance: Scene | undefined = undefined;
 
   private constructor() {
     this.state = SceneState.Paused;
     this.cache = new Map();
+    this.worker = new UpdateCellColors();
   }
 
   static getInstance(): Scene {
@@ -58,15 +62,15 @@ export default class Scene {
     return Scene.instance;
   }
 
-  private init(numberOfCells: number): string[][] {
+  private init(): string[][] {
     if (!this.cellColors) {
-      this.cellColors = new Array(numberOfCells)
+      this.cellColors = new Array(this.numberOfCells)
         .fill(null)
-        .map(() => new Array(numberOfCells).fill(null).map(randomCell));
+        .map(() => new Array(this.numberOfCells).fill(null).map(randomCell));
     }
 
-    if (!this.cache.has(numberOfCells)) {
-      this.cache.set(numberOfCells, new Map());
+    if (!this.cache.has(this.numberOfCells)) {
+      this.cache.set(this.numberOfCells, new Map());
     }
 
     return this.cellColors;
@@ -123,7 +127,7 @@ export default class Scene {
   getScene(params: SceneParams): SceneDescription {
     this.t += params.dt;
     this.canvasSize = params.canvasSize;
-    const cellColors = this.init(params.numberOfCells);
+    const cellColors = this.init();
 
     if (this.shouldUpdate(params.dt, params.frameRate)) {
       this.updateCellColors(cellColors);
@@ -132,6 +136,7 @@ export default class Scene {
     return {
       t: this.t,
       cellColors,
+      numberOfCells: this.numberOfCells,
     };
   }
 
@@ -145,6 +150,7 @@ export default class Scene {
         return resolve({
           t: this.t,
           cellColors,
+          numberOfCells: this.numberOfCells,
         });
       }
 
@@ -156,6 +162,7 @@ export default class Scene {
         resolve({
           t: this.t,
           cellColors,
+          numberOfCells: this.numberOfCells,
         });
       };
 
@@ -202,6 +209,11 @@ export default class Scene {
     this.cellColors = new Array(this.cellColors.length)
       .fill(null)
       .map(() => new Array(this.cellColors!.length).fill(getDeadColor()));
+  }
+
+  setNumberOfCells(numOfCells: number) {
+    this.numberOfCells = numOfCells;
+    this.cellColors = undefined;
   }
 
   destroy() {

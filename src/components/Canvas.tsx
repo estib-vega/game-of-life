@@ -3,12 +3,11 @@ import { useEngine, useScene } from "./hooks";
 
 interface CanvasProps {
   size: number;
-  numberOfCells: number;
   frameRate: number;
 }
 
 const Canvas = (props: CanvasProps): JSX.Element => {
-  const { size, numberOfCells, frameRate } = props;
+  const { size, frameRate } = props;
   const EngineHook = useEngine();
   const SceneHook = useScene();
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -20,12 +19,12 @@ const Canvas = (props: CanvasProps): JSX.Element => {
       throw new Error("Unable to init canvas context");
     }
 
-    EngineHook.start({ ctx, numberOfCells });
+    EngineHook.start({ ctx });
 
     () => {
       EngineHook.destroy();
     };
-  }, [numberOfCells]);
+  }, []);
 
   React.useEffect(() => {
     EngineHook.setFrameRate(frameRate);

@@ -8,6 +8,7 @@ interface SceneHook {
   pause: () => void;
   clear: () => void;
   toggleCell: (point: { x: number; y: number }) => void;
+  setNumberOfCells: (numOfCells: number) => void;
 }
 
 export function useScene(): SceneHook {
@@ -38,7 +39,12 @@ export function useScene(): SceneHook {
     scene.clear();
   };
 
-  return { restart, play, pause, toggleCell, clear };
+  const setNumberOfCells = (numOfCells: number) => {
+    const scene = sceneRef.current;
+    scene.setNumberOfCells(numOfCells);
+  };
+
+  return { restart, play, pause, toggleCell, clear, setNumberOfCells };
 }
 
 interface EngineHook {

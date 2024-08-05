@@ -5,14 +5,20 @@ import { DEFAULT_FRAME_RATE } from "./lib/engine";
 import IconButton from "./components/generic/IconButton";
 import ToggleButtonIcon from "./components/generic/ToggleButtonIcon";
 import { useScene } from "./components/hooks";
+import NumericInput from "./components/controllers/NumericInput";
+import { DEFAULT_NUMBER_OF_CELLS } from "./lib/gameplay";
 
+const MIN_NUM_OF_CELLS = 3;
+const MAX_NUM_OF_CELLS = 1000;
 const CANVAS_SIZE = 1000;
-const NUM_OF_CELLS = 400;
 
 function App() {
   const SceneHook = useScene();
   const [frameRate, setFrameRate] = React.useState<number>(DEFAULT_FRAME_RATE);
   const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
+  const [numOfCells, setNumOfCells] = React.useState<number>(
+    DEFAULT_NUMBER_OF_CELLS
+  );
 
   const toggleSceneState = () => {
     setIsPlaying((prev) => {
@@ -24,6 +30,15 @@ function App() {
     });
   };
 
+  const handleCellNumChange = (value: number) => {
+    if (isPlaying) {
+      return;
+    }
+
+    SceneHook.setNumberOfCells(value);
+    setNumOfCells(value);
+  };
+
   return (
     <div className="dark w-full h-dvh bg-background fixed overflow-hidden">
       <div className="container h-full overflow-hidden flex">
@@ -32,13 +47,25 @@ function App() {
         </header>
         <main className="box-border h-full flex justify-center items-center text-primary">
           <div className="container py-2 w-full flex flex-col justify-start items-center gap-4">
+            <NumericInput
+              value={numOfCells}
+              min={MIN_NUM_OF_CELLS}
+              max={MAX_NUM_OF_CELLS}
+              name="Number of Cells"
+              onChange={handleCellNumChange}
+              disabled={isPlaying}
+            />
             <ToggleButtonIcon
               iconOn="pause"
               iconOff="play"
               value={isPlaying}
               onClick={toggleSceneState}
             />
-            <IconButton icon="restart" onClick={SceneHook.restart} />
+            <IconButton
+              icon="restart"
+              onClick={SceneHook.restart}
+              disabled={isPlaying}
+            />
             <IconButton
               icon="clear"
               onClick={SceneHook.clear}
@@ -53,11 +80,7 @@ function App() {
               onChange={setFrameRate}
             />
           </div>
-          <Canvas
-            size={CANVAS_SIZE}
-            numberOfCells={NUM_OF_CELLS}
-            frameRate={frameRate}
-          />
+          <Canvas size={CANVAS_SIZE} frameRate={frameRate} />
         </main>
       </div>
     </div>
