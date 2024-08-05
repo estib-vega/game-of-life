@@ -111,6 +111,11 @@ export default class Scene {
     };
   }
 
+  restart() {
+    this.t = 0;
+    this.cellColors = undefined;
+  }
+
   destroy() {
     Scene.instance = undefined;
   }

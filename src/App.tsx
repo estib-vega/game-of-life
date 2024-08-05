@@ -4,11 +4,13 @@ import RangeInput from "./components/controllers/RangeInput";
 import { DEFAULT_FRAME_RATE } from "./lib/engine";
 import IconButton from "./components/generic/IconButton";
 import ToggleButtonIcon from "./components/generic/ToggleButtonIcon";
+import { useScene } from "./components/hooks";
 
 const CANVAS_SIZE = 600;
 const NUM_OF_CELLS = 100;
 
 function App() {
+  const SceneHook = useScene();
   const [frameRate, setFrameRate] = React.useState<number>(DEFAULT_FRAME_RATE);
   const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
 
@@ -31,7 +33,7 @@ function App() {
               value={isPlaying}
               onClick={() => setIsPlaying((prev) => !prev)}
             />
-            <IconButton icon="restart" onClick={() => console.log("restart")} />
+            <IconButton icon="restart" onClick={SceneHook.restart} />
             <RangeInput
               name="Frame Rate"
               value={frameRate}

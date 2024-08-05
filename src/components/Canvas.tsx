@@ -1,5 +1,5 @@
-import Engine from "@/lib/engine";
 import React from "react";
+import { useEngine } from "./hooks";
 
 interface CanvasProps {
   size: number;
@@ -9,7 +9,7 @@ interface CanvasProps {
 
 const Canvas = (props: CanvasProps): JSX.Element => {
   const { size, numberOfCells, frameRate } = props;
-  const engineRef = React.useRef<Engine>(Engine.getInstance());
+  const EngineHook = useEngine();
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
   React.useEffect(() => {
@@ -19,17 +19,15 @@ const Canvas = (props: CanvasProps): JSX.Element => {
       throw new Error("Unable to init canvas context");
     }
 
-    const engine = engineRef.current;
-    engine.start({ ctx, numberOfCells });
+    EngineHook.start({ ctx, numberOfCells });
 
     () => {
-      engine.destroy();
+      EngineHook.destroy();
     };
   }, [numberOfCells]);
 
   React.useEffect(() => {
-    const engine = engineRef.current;
-    engine.setFrameRate(frameRate);
+    EngineHook.setFrameRate(frameRate);
   }, [frameRate]);
 
   return <canvas ref={canvasRef} width={size} height={size} />;

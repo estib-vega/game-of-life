@@ -2,7 +2,7 @@ import Scene from "./scene";
 
 export const DEFAULT_FRAME_RATE = 10;
 
-interface DrawParams {
+export interface DrawParams {
   ctx: CanvasRenderingContext2D;
   numberOfCells: number;
 }
