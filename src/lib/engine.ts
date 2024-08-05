@@ -66,4 +66,9 @@ export default class Engine {
   start(params: DrawParams) {
     requestAnimationFrame((t) => this.render(t, params));
   }
+
+  destroy() {
+    this.scene.destroy();
+    Engine.instance = undefined;
+  }
 }

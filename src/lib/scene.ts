@@ -78,4 +78,8 @@ export default class Scene {
       cellColors,
     };
   }
+
+  destroy() {
+    Scene.instance = undefined;
+  }
 }
