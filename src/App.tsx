@@ -4,7 +4,11 @@ import RangeInput from "./components/controllers/RangeInput";
 import { DEFAULT_FRAME_RATE } from "./lib/engine";
 import IconButton from "./components/generic/IconButton";
 import ToggleButtonIcon from "./components/generic/ToggleButtonIcon";
-import { useScene } from "./components/hooks";
+import {
+  useDownloadTextFile,
+  useScene,
+  useUploadTextFile,
+} from "./components/hooks";
 import NumericInput from "./components/controllers/NumericInput";
 import { DEFAULT_NUMBER_OF_CELLS } from "./lib/gameplay";
 
@@ -19,6 +23,13 @@ function App() {
   const [numOfCells, setNumOfCells] = React.useState<number>(
     DEFAULT_NUMBER_OF_CELLS
   );
+  const { download } = useDownloadTextFile("application/json");
+  const { upload } = useUploadTextFile(".json", (data) => {
+    const sceneDescription = SceneHook.fromJson(data);
+    if (sceneDescription) {
+      setNumOfCells(sceneDescription.numberOfCells);
+    }
+  });
 
   const toggleSceneState = () => {
     setIsPlaying((prev) => {
@@ -37,6 +48,11 @@ function App() {
 
     if (!Number.isNaN(value)) SceneHook.setNumberOfCells(value);
     setNumOfCells(value);
+  };
+
+  const handleDownload = () => {
+    const data = SceneHook.toJson();
+    download(data);
   };
 
   return (
@@ -79,6 +95,8 @@ function App() {
               step={1}
               onChange={setFrameRate}
             />
+            <IconButton icon="download" onClick={handleDownload} />
+            <IconButton icon="upload" onClick={upload} disabled={isPlaying} />
           </div>
           <Canvas size={CANVAS_SIZE} frameRate={frameRate} />
         </main>

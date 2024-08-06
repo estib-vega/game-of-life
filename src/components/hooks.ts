@@ -1,5 +1,6 @@
 import Engine, { DrawParams } from "@/lib/engine";
-import Scene from "@/lib/scene";
+import Scene, { SceneDescription } from "@/lib/scene";
+import { isStr } from "@/utils/typing";
 import React from "react";
 
 interface SceneHook {
@@ -9,6 +10,8 @@ interface SceneHook {
   clear: () => void;
   toggleCell: (point: { x: number; y: number }) => void;
   setNumberOfCells: (numOfCells: number) => void;
+  toJson: () => string;
+  fromJson: (data: string) => SceneDescription | undefined;
 }
 
 export function useScene(): SceneHook {
@@ -44,7 +47,26 @@ export function useScene(): SceneHook {
     scene.setNumberOfCells(numOfCells);
   };
 
-  return { restart, play, pause, toggleCell, clear, setNumberOfCells };
+  const toJson = () => {
+    const scene = sceneRef.current;
+    return scene.toJsonString();
+  };
+
+  const fromJson = (data: string) => {
+    const scene = sceneRef.current;
+    return scene.fromJsonString(data);
+  };
+
+  return {
+    restart,
+    play,
+    pause,
+    toggleCell,
+    clear,
+    setNumberOfCells,
+    toJson,
+    fromJson,
+  };
 }
 
 interface EngineHook {
@@ -72,4 +94,61 @@ export function useEngine(): EngineHook {
   };
 
   return { start, setFrameRate, destroy };
+}
+
+interface UploadTextFileHook {
+  upload: () => void;
+}
+
+export function useUploadTextFile(
+  ext: string,
+  onUpload: (data: string) => void
+): UploadTextFileHook {
+  const upload = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ext;
+    input.style.display = "none";
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) {
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const data = e.target?.result;
+        if (isStr(data)) onUpload(data);
+      };
+
+      reader.readAsText(file);
+    };
+
+    document.body.appendChild(input);
+    input.click();
+    document.body.removeChild(input);
+  };
+
+  return { upload };
+}
+
+interface DownloadTextFileHook {
+  download: (data: string) => void;
+}
+
+export function useDownloadTextFile(mimeType: string): DownloadTextFileHook {
+  const download = (data: string) => {
+    const blob = new Blob([data], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "game-of-life.txt";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  return { download };
 }

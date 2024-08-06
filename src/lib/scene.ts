@@ -25,10 +25,34 @@ interface SceneParams {
   cellColors?: string[][];
 }
 
-interface SceneDescription {
+export interface SceneDescription {
   t: number;
   cellColors: string[][];
   numberOfCells: number;
+}
+
+function validateCellColors(something: unknown): something is string[][] {
+  if (!Array.isArray(something)) {
+    return false;
+  }
+
+  for (const row of something) {
+    if (!Array.isArray(row)) {
+      return false;
+    }
+
+    if (row.length !== something.length) {
+      return false;
+    }
+
+    for (const cell of row) {
+      if (typeof cell !== "string") {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 /**
@@ -203,6 +227,36 @@ export default class Scene {
   setNumberOfCells(numOfCells: number) {
     this.numberOfCells = numOfCells;
     this.cellColors = undefined;
+  }
+
+  toJsonString(): string {
+    if (!this.cellColors) {
+      return "";
+    }
+
+    return JSON.stringify(this.cellColors);
+  }
+
+  fromJsonString(data: string): SceneDescription | undefined {
+    try {
+      const parsedData = JSON.parse(data);
+      if (!validateCellColors(parsedData)) {
+        throw new Error("Invalid JSON format.");
+      }
+      this.numberOfCells = parsedData.length;
+      this.cellColors = parsedData;
+      this.t = 0;
+
+      return {
+        t: this.t,
+        cellColors: this.cellColors,
+        numberOfCells: this.numberOfCells,
+      };
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("Invalid JSON data.", e);
+    }
+    return undefined;
   }
 
   destroy() {
