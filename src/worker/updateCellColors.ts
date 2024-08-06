@@ -20,8 +20,15 @@ function getOrCreateCache(key: number): NeighborCache {
   return cache.get(key) ?? raise("Cache not found.");
 }
 
-self.onmessage = (e: MessageEvent<TaskDescription>) => {
-  const { cellColors, start, end } = e.data;
+/**
+ * Updates the colors of the cells in the specified task.
+ *
+ * @param task - The task description containing the cell colors, start index, and end index.
+ * @returns The updated task description with the modified cell colors, start index, and end index.
+ */
+export function updateCellColors(task: TaskDescription): TaskDescription {
+  const { cellColors, start, end } = task;
+
   const cache = getOrCreateCache(cellColors.length);
   const updates: [number, number, string][] = [];
 
@@ -50,5 +57,10 @@ self.onmessage = (e: MessageEvent<TaskDescription>) => {
     cellColors[x][y] = color;
   }
 
+  return { cellColors, start, end };
+}
+
+self.onmessage = (e: MessageEvent<TaskDescription>) => {
+  const { cellColors, start, end } = updateCellColors(e.data);
   self.postMessage({ cellColors, start, end });
 };
