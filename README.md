@@ -33,7 +33,7 @@ Required
 - [x] Ability to download and upload the game's state
 - [x] Ablity to toggle cells with the mouse (needs to be improved)
 - [x] Speed control
-- [ ] Unit tests
+- [x] Unit tests
 ---
 Nice-to-have
 - [ ] Colorization
