@@ -48,7 +48,7 @@ export default class Engine {
 
   private async render(t: number, params: DrawParams) {
     const dt = this.getDeltaTime(t);
-    const sceneDescription = await this.scene.getSceneFromWorker({
+    const sceneDescription = await this.scene.getScene({
       dt,
       frameRate: this.frameRate,
       canvasSize: params.ctx.canvas.width,

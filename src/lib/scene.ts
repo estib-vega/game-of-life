@@ -1,15 +1,10 @@
-import { raise } from "@/utils/errors";
 import {
   DEFAULT_NUMBER_OF_CELLS,
   getAliveColor,
   getDeadColor,
-  getNeighbors,
   isAlive,
-  isDead,
   NeighborCache,
   randomCell,
-  shouldBeBorn,
-  shouldBeDead,
 } from "./gameplay";
 import WorkerController from "./workerController";
 
@@ -116,55 +111,7 @@ export default class Scene {
     return false;
   }
 
-  private updateCellColors(cellColors: string[][]) {
-    const cache =
-      this.cache.get(cellColors.length) ?? raise("Cache not found.");
-
-    const updates: [number, number, string][] = [];
-
-    for (let x = 0; x < cellColors.length; x++) {
-      for (let y = 0; y < cellColors[x].length; y++) {
-        const lastColor = cellColors[x][y];
-        const neighbors = getNeighbors(x, y, cellColors, cache);
-
-        if (isDead(lastColor)) {
-          if (shouldBeBorn(neighbors)) {
-            updates.push([x, y, getAliveColor()]);
-          }
-          continue;
-        }
-
-        if (isAlive(lastColor)) {
-          if (shouldBeDead(neighbors)) {
-            updates.push([x, y, getDeadColor()]);
-          }
-          continue;
-        }
-      }
-    }
-
-    for (const [x, y, color] of updates) {
-      cellColors[x][y] = color;
-    }
-  }
-
-  getScene(params: SceneParams): SceneDescription {
-    this.t += params.dt;
-    this.canvasSize = params.canvasSize;
-    const cellColors = this.init();
-
-    if (this.shouldUpdate(params.dt, params.frameRate)) {
-      this.updateCellColors(cellColors);
-    }
-
-    return {
-      t: this.t,
-      cellColors,
-      numberOfCells: this.numberOfCells,
-    };
-  }
-
-  async getSceneFromWorker(params: SceneParams): Promise<SceneDescription> {
+  async getScene(params: SceneParams): Promise<SceneDescription> {
     this.t += params.dt;
     this.canvasSize = params.canvasSize;
     const cellColors = this.init();
