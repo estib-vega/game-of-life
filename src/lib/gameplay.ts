@@ -106,19 +106,3 @@ export function shouldBeDead(neighbors: string[]): boolean {
     aliveNeighbors.length > DEATH_THRESHOLD_MAX
   );
 }
-
-export default class Gameplay {
-  private static instance: Gameplay | undefined = undefined;
-  private constructor() {}
-
-  getInstace(): Gameplay {
-    if (!Gameplay.instance) {
-      Gameplay.instance = new Gameplay();
-    }
-    return Gameplay.instance;
-  }
-
-  destroy() {
-    Gameplay.instance = undefined;
-  }
-}
