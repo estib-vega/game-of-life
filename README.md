@@ -26,6 +26,19 @@ bun test
 
 Make sure you have Bun installed before running these commands.
 
+## What's in this project
+Required
+- [x] Game simulation logic
+- [x] Ability to play, pause, restart and clear
+- [x] Ability to download and upload the game's state
+- [x] Ablity to toggle cells with the mouse (needs to be improved)
+- [x] Speed control
+- [ ] Unit tests
+---
+Nice-to-have
+- [ ] Colorization
+- [ ] Time Travel
+
 ## What's this is missing
 
 There are a couple of things I think are missing in this implementation that I didn't have enough time (or motivation :P) for. Just the classic optimizations
